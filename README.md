@@ -202,7 +202,7 @@ No production secrets, private keys, runtime storage, generated bundles, or depl
 
 Codex is both the subject of the receipt and the primary development environment used to build AgentProof.
 
-- Primary Codex build thread: `019e08ca-0b43-7192-b53c-a7c811171186`.
+- Primary Codex build thread and submitted `/feedback` Session ID: `019e08ca-0b43-7192-b53c-a7c811171186`.
 - Sealed Codex CLI demo session: `019f71f9-9e66-7392-a907-a54091483632`.
 - Demo model recorded in the receipt: `gpt-5.6-sol`.
 - The implementation, tests, production deployment, verifier, and green/red acceptance run were executed collaboratively through Codex.
