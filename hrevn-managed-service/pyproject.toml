@@ -5,7 +5,8 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "hrevn-managed-service"
 version = "0.1.0"
-description = "Private VPS-backed runtime for HREVN."
+description = "HREVN EB1 runtime and AgentProof tooling for verifiable Codex session receipts."
+license = { text = "Apache-2.0" }
 requires-python = ">=3.10"
 dependencies = [
   "fastapi>=0.116.0",
@@ -16,6 +17,9 @@ dependencies = [
   "web3>=7.12.0",
   "cryptography>=45.0.0",
 ]
+
+[project.scripts]
+hrevn-agentproof = "hrevn_managed_service.cli.agentproof:main"
 
 [project.optional-dependencies]
 dev = [

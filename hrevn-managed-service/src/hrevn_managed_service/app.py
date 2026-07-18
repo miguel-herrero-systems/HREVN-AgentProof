@@ -3,6 +3,7 @@ from __future__ import annotations
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from .api.agentproof import router as agentproof_router
 from .api.baseline import router as baseline_router
 from .api.bundles import router as bundles_router
 from .api.company_account import router as company_account_router
@@ -29,6 +30,7 @@ app.add_middleware(
 )
 app.include_router(health_router)
 app.include_router(version_router)
+app.include_router(agentproof_router)
 app.include_router(baseline_router)
 app.include_router(bundles_router)
 app.include_router(company_account_router)

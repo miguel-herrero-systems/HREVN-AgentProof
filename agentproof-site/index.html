@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en" class="notranslate" translate="no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Verify a Codex agent session through canonical hashes, an Ed25519 signature, and a public Sepolia anchor."
+    />
+    <meta name="theme-color" content="#0b1715" />
+    <meta name="google" content="notranslate" />
+    <link rel="icon" href="./assets/agentproof-mark.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./styles.css" />
+    <title>AgentProof by HREVN | Verifiable AI agent receipts</title>
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="site-header">
+        <a class="brand" href="./" aria-label="AgentProof home">
+          <span class="brand-mark" aria-hidden="true">AP</span>
+          <span class="brand-name">AgentProof</span>
+          <span class="brand-by">by HREVN</span>
+        </a>
+        <div class="network-pill"><span></span> Sepolia testnet</div>
+      </header>
+
+      <main>
+        <section class="hero" aria-labelledby="hero-title">
+          <div class="eyebrow">VERIFIABLE RECEIPTS FOR AI AGENTS</div>
+          <h1 id="hero-title">Every agent action,<br /><em>accountable.</em></h1>
+          <p class="hero-copy">
+            A real Codex session, committed event by event, signed with Ed25519 and
+            anchored publicly on Ethereum Sepolia.
+          </p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="#receipt">Inspect live receipt</a>
+            <a class="button button-secondary" href="#reverify">Test repository state</a>
+          </div>
+        </section>
+
+        <section class="receipt-card" id="receipt" aria-labelledby="receipt-title">
+          <div class="receipt-head">
+            <div>
+              <div class="eyebrow">LIVE EVIDENCE BUNDLE</div>
+              <h2 id="receipt-title">Codex session receipt</h2>
+            </div>
+            <div class="global-status is-loading" id="global-status" aria-live="polite">
+              <span class="status-dot"></span>
+              <span id="global-status-text">Verifying</span>
+            </div>
+          </div>
+
+          <div class="session-strip">
+            <div>
+              <span>Bundle</span>
+              <strong id="bundle-id">Loading...</strong>
+            </div>
+            <div>
+              <span>Agent</span>
+              <strong id="agent-name">Codex CLI</strong>
+            </div>
+            <div>
+              <span>Model</span>
+              <strong id="model-name">Loading...</strong>
+            </div>
+            <div>
+              <span>Events</span>
+              <strong id="event-count">-</strong>
+            </div>
+          </div>
+
+          <div class="proof-grid">
+            <article class="proof-item">
+              <span class="proof-index">01</span>
+              <div>
+                <h3>Hash chain</h3>
+                <p id="chain-status">Checking canonical event order</p>
+                <code id="chain-hash">-</code>
+              </div>
+            </article>
+            <article class="proof-item">
+              <span class="proof-index">02</span>
+              <div>
+                <h3>Ed25519 signature</h3>
+                <p id="signature-status">Checking signed root</p>
+                <code id="signature-key">-</code>
+              </div>
+            </article>
+            <article class="proof-item">
+              <span class="proof-index">03</span>
+              <div>
+                <h3>Sepolia anchor</h3>
+                <p id="anchor-status">Checking public transaction</p>
+                <a id="etherscan-link" href="#" target="_blank" rel="noreferrer">Open transaction</a>
+              </div>
+            </article>
+          </div>
+
+          <div class="timeline-section">
+            <div class="section-heading">
+              <div>
+                <div class="eyebrow">SESSION TIMELINE</div>
+                <h3>What Codex committed</h3>
+              </div>
+              <p>Hashes only. No prompt, source code, command output or diff content is published.</p>
+            </div>
+            <ol class="timeline" id="timeline" aria-live="polite">
+              <li class="timeline-loading">Loading sealed events...</li>
+            </ol>
+          </div>
+
+          <div class="receipt-footer">
+            <a class="text-link" id="download-link" href="#">Download Evidence Bundle</a>
+            <span>EB1 canonical package</span>
+          </div>
+        </section>
+
+        <section class="reverify" id="reverify" aria-labelledby="reverify-title">
+          <div class="reverify-intro">
+            <div class="eyebrow">THE GREEN / RED TEST</div>
+            <h2 id="reverify-title">Do the files still match the sealed session?</h2>
+            <p>
+              Select a repository folder. Your browser hashes the committed files locally and
+              compares them with the signed receipt. Files never leave your device.
+            </p>
+          </div>
+
+          <div class="test-layout">
+            <div class="test-steps">
+              <div class="step">
+                <span>1</span>
+                <p><strong>Download</strong> the tiny repository used in the real session.</p>
+              </div>
+              <div class="step">
+                <span>2</span>
+                <p><strong>Select its folder.</strong> The original state verifies green.</p>
+              </div>
+              <div class="step">
+                <span>3</span>
+                <p><strong>Edit calculator.py</strong> and select again. The exact file fails red.</p>
+              </div>
+            </div>
+
+            <div class="test-console">
+              <div class="console-topbar">
+                <span>LOCAL RE-VERIFICATION</span>
+                <span class="privacy-label">ON-DEVICE ONLY</span>
+              </div>
+              <div class="console-result is-idle" id="repo-result" aria-live="polite">
+                <span class="result-symbol" id="result-symbol">?</span>
+                <div>
+                  <h3 id="result-title">Repository not selected</h3>
+                  <p id="result-copy">Choose the demo folder to compare its current bytes.</p>
+                </div>
+              </div>
+              <ul class="file-results" id="file-results"></ul>
+              <div class="console-actions">
+                <a class="button button-secondary" href="./assets/agentproof-demo-repository.zip" download>
+                  Download demo repository
+                </a>
+                <button class="button button-primary" type="button" id="select-folder">
+                  Select repository folder
+                </button>
+                <input id="folder-input" type="file" webkitdirectory multiple hidden />
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="principles" aria-label="AgentProof principles">
+          <article>
+            <span>01 / PRIVACY</span>
+            <h3>Commitments, not content</h3>
+            <p>Public receipts prove integrity without publishing private code or agent output.</p>
+          </article>
+          <article>
+            <span>02 / ORDER</span>
+            <h3>Sequence is evidence</h3>
+            <p>Every event commits the previous event hash. Deletion and reordering break the chain.</p>
+          </article>
+          <article>
+            <span>03 / INDEPENDENCE</span>
+            <h3>Verify without trust</h3>
+            <p>The EB1 package carries its checksums, root specification, public key and chain proof.</p>
+          </article>
+        </section>
+      </main>
+
+      <footer>
+        <span>AgentProof / OpenAI Build Week 2026</span>
+        <span>Built with Codex and HREVN EB1</span>
+      </footer>
+    </div>
+    <script type="module" src="./app.js"></script>
+  </body>
+</html>

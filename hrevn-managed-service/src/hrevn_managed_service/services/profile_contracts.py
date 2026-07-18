@@ -8,6 +8,7 @@ PROPERTY_MANAGER_RENTAL_VISIT_V1 = "property_manager_rental_visit_v1"
 JUNTA_ANDALUCIA_PROPERTY_EVENT_V1 = "junta_andalucia_property_event_v1"
 PROMOTORA_CONSTRUCTION_CERTIFICATE_V1 = "promotora_construction_certificate_v1"
 PROMOTORA_HANDOVER_REVIEW_V1 = "promotora_handover_review_v1"
+AGENTPROOF_CODEX_SESSION_V1 = "agentproof_codex_session_v1"
 
 
 PROFILE_CONTRACTS: dict[str, dict[str, Any]] = {
@@ -114,6 +115,52 @@ PROFILE_CONTRACTS: dict[str, dict[str, Any]] = {
             "documents": ["handover_review_report"],
             "images": ["handover_defect_photo"],
             "attachments": [],
+        },
+    },
+    AGENTPROOF_CODEX_SESSION_V1: {
+        "required_profile_inputs": [
+            "session_id",
+            "agent_name",
+            "model",
+            "started_at",
+            "ended_at",
+            "repository_id",
+            "base_commit",
+            "head_commit",
+            "event_count",
+            "chain_head_sha256",
+        ],
+        "required_file_groups": {
+            "documents": 1,
+            "images": 0,
+            "attachments": 0,
+        },
+        "recommended_roles": {
+            "documents": ["agent_session_trace"],
+        },
+        "authoritative_document_contracts": {
+            "agent_session_trace": {
+                "filename": "agent-session.json",
+                "schema_version": "agentproof_codex_session_v1",
+                "canonicalization": {
+                    "name": "HREVN_CANONICAL_JSON_V1",
+                    "encoding": "utf-8",
+                    "unicode_normalization": "NFC",
+                    "object_key_order": "ascending_unicode_codepoint",
+                    "array_order": "preserved",
+                    "item_separators": [",", ":"],
+                    "whitespace": "none",
+                    "trailing_newline": False,
+                    "allowed_number_types": ["integer"],
+                },
+                "hash_chain": {
+                    "algorithm": "sha256",
+                    "genesis_previous_hash": "0" * 64,
+                    "event_hash_scope": "canonical_event_without_event_hash",
+                    "sequence_start": 1,
+                    "sequence_step": 1,
+                },
+            }
         },
     },
 }

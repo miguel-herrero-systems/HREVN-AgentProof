@@ -9,6 +9,7 @@ EB1_PROFILE_PACKAGE_TYPES: dict[str, str] = {
     "junta_andalucia_property_event_v1": "junta_andalucia_property_event_bundle",
     "promotora_construction_certificate_v1": "promotora_construction_certificate_bundle",
     "promotora_handover_review_v1": "promotora_handover_review_bundle",
+    "agentproof_codex_session_v1": "agentproof_codex_session_bundle",
 }
 
 
