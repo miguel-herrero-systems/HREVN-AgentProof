@@ -1,0 +1,26 @@
+name: AgentProof PR receipt
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    paths:
+      - ".agentproof/agent-session.json"
+      - "agentproof-demo-repository/**"
+      - ".github/workflows/agentproof.yml"
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  verify-and-seal:
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
+      - uses: miguel-herrero-systems/HREVN-AgentProof@v1
+        with:
+          receipt-path: .agentproof/agent-session.json
+          repository-path: agentproof-demo-repository
+          api-key: ${{ secrets.HREVN_AGENTPROOF_API_KEY }}
+          github-token: ${{ github.token }}
