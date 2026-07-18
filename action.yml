@@ -1,0 +1,120 @@
+name: HREVN AgentProof
+description: Verify a Codex session receipt, seal it as EB1, and publish proof on a pull request.
+author: HREVN
+
+branding:
+  icon: shield
+  color: green
+
+inputs:
+  receipt-path:
+    description: Repository-relative path to the canonical AgentProof session receipt.
+    required: false
+    default: .agentproof/agent-session.json
+  repository-path:
+    description: Repository-relative directory whose final state must match the receipt.
+    required: false
+    default: .
+  api-url:
+    description: Authorized HREVN EB1 API base URL.
+    required: false
+    default: https://agentproof.hrevn.com/api
+  api-key:
+    description: HREVN API credential used only as a masked environment variable.
+    required: true
+  github-token:
+    description: GitHub token used to create or update the pull request comment.
+    required: false
+    default: ""
+  comment-on-pr:
+    description: Create or update one AgentProof comment when the event is a pull request.
+    required: false
+    default: "true"
+  allow-pending:
+    description: Permit unsigned or unanchored local output. Keep false for public proof.
+    required: false
+    default: "false"
+  result-directory:
+    description: Repository-relative directory for the receipt, EB1 ZIP, sidecar, and result.
+    required: false
+    default: agentproof-action-result
+  artifact-retention-days:
+    description: Number of days GitHub retains the workflow artifact.
+    required: false
+    default: "30"
+
+outputs:
+  bundle-id:
+    description: Generated EB1 bundle identifier.
+    value: ${{ steps.agentproof.outputs.bundle-id }}
+  verification-url:
+    description: Public EB1 verification URL.
+    value: ${{ steps.agentproof.outputs.verification-url }}
+  transaction-reference:
+    description: Sepolia transaction hash.
+    value: ${{ steps.agentproof.outputs.transaction-reference }}
+  artifact-url:
+    description: Authenticated GitHub URL for the uploaded workflow artifact.
+    value: ${{ steps.upload.outputs.artifact-url }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Python
+      uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1 # v6
+      with:
+        python-version: "3.12"
+
+    - name: Install AgentProof
+      shell: bash
+      run: python -m pip install --disable-pip-version-check "${{ github.action_path }}/hrevn-managed-service"
+
+    - name: Verify repository and seal EB1
+      id: agentproof
+      shell: bash
+      env:
+        HREVN_AGENTPROOF_API_KEY: ${{ inputs.api-key }}
+        AGENTPROOF_RECEIPT_PATH: ${{ inputs.receipt-path }}
+        AGENTPROOF_REPOSITORY_PATH: ${{ inputs.repository-path }}
+        AGENTPROOF_RESULT_DIRECTORY: ${{ inputs.result-directory }}
+        AGENTPROOF_API_URL: ${{ inputs.api-url }}
+        AGENTPROOF_ALLOW_PENDING: ${{ inputs.allow-pending }}
+      run: |
+        args=(
+          run
+          --receipt "$AGENTPROOF_RECEIPT_PATH"
+          --repository "$AGENTPROOF_REPOSITORY_PATH"
+          --result-directory "$AGENTPROOF_RESULT_DIRECTORY"
+          --api-url "$AGENTPROOF_API_URL"
+        )
+        if [[ "$AGENTPROOF_ALLOW_PENDING" == "true" ]]; then
+          args+=(--allow-pending)
+        fi
+        python -m hrevn_managed_service.agentproof.github_action "${args[@]}"
+
+    - name: Upload AgentProof evidence
+      id: upload
+      uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+      with:
+        name: agentproof-${{ steps.agentproof.outputs.bundle-id }}
+        path: ${{ steps.agentproof.outputs.result-directory }}
+        include-hidden-files: true
+        if-no-files-found: error
+        retention-days: ${{ inputs.artifact-retention-days }}
+
+    - name: Publish pull request proof
+      if: ${{ inputs.comment-on-pr == 'true' && github.event_name == 'pull_request' && inputs.github-token != '' }}
+      shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        AGENTPROOF_RESULT_JSON: ${{ steps.agentproof.outputs.result-json }}
+        AGENTPROOF_ARTIFACT_URL: ${{ steps.upload.outputs.artifact-url }}
+      run: |
+        python -m hrevn_managed_service.agentproof.github_action comment \
+          --result-json "$AGENTPROOF_RESULT_JSON" \
+          --artifact-url "$AGENTPROOF_ARTIFACT_URL"
+
+    - name: Explain skipped pull request comment
+      if: ${{ inputs.comment-on-pr == 'true' && github.event_name == 'pull_request' && inputs.github-token == '' }}
+      shell: bash
+      run: echo "::warning::AgentProof sealed and uploaded the EB1, but skipped the PR comment because github-token was not provided."

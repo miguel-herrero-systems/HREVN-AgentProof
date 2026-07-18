@@ -99,6 +99,7 @@ pytest -q \
   tests/test_agentproof_adapter.py \
   tests/test_agentproof_seal.py \
   tests/test_agentproof_verification.py \
+  tests/test_agentproof_github_action.py \
   tests/test_codex_capture.py \
   tests/test_eb1_profile_registry.py
 ```
@@ -154,6 +155,26 @@ hrevn-agentproof seal \
 
 By default, `seal` rejects unsigned or unanchored output. `--allow-pending` is available only for local environments intentionally running without signing or real anchoring.
 
+## GitHub Action
+
+The repository includes a composite Action that turns a committed Codex receipt into a
+pull request proof. It verifies the checked-out files first, seals the canonical receipt
+only after a `MATCH`, uploads the receipt plus signed EB1 ZIP and `.sha256` sidecar, and
+creates or updates one PR comment with verification and Sepolia links.
+
+```yaml
+- uses: OWNER/HREVN-AgentProof@v1
+  with:
+    receipt-path: .agentproof/agent-session.json
+    api-key: ${{ secrets.HREVN_AGENTPROOF_API_KEY }}
+    github-token: ${{ github.token }}
+```
+
+The API key is passed only as a masked environment variable. The recommended workflow
+does not run with secrets on fork pull requests and never uses `pull_request_target` to
+execute untrusted code. See [`docs/GITHUB_ACTION.md`](docs/GITHUB_ACTION.md) for the full
+safe workflow and failure behavior.
+
 ## Build Week boundary
 
 AgentProof extends infrastructure that existed before OpenAI Build Week 2026. The imported baseline is tagged `pre-agentproof-buildweek`.
@@ -167,6 +188,7 @@ AgentProof extends infrastructure that existed before OpenAI Build Week 2026. Th
 | Managed API foundation | Before/after file and unified-diff commitments |
 |  | Repository re-verification with exact mismatch paths |
 |  | AgentProof public API adapter and mobile verifier |
+|  | Composite GitHub Action, EB1 artifact, and idempotent PR proof comment |
 
 Review the complete Build Week change with:
 
@@ -193,7 +215,9 @@ The sealed demo session contains five events: four command commitments and one c
 - `hrevn-managed-service/src/hrevn_managed_service/adapters/agentproof_adapter.py`: canonical receipt and event-chain validation.
 - `hrevn-managed-service/src/hrevn_managed_service/agentproof/seal.py`: EB1 sealing client and signed/anchored response checks.
 - `hrevn-managed-service/src/hrevn_managed_service/agentproof/repository_verify.py`: exact repository-state comparison.
+- `hrevn-managed-service/src/hrevn_managed_service/agentproof/github_action.py`: Action orchestration, artifact integrity, and idempotent PR comments.
 - `hrevn-managed-service/src/hrevn_managed_service/api/agentproof.py`: privacy-safe public receipt endpoint.
+- `action.yml`: reusable composite GitHub Action.
 - `agentproof-site/`: public verifier and on-device green/red comparison.
 - `docs/AGENTPROOF_SESSION_RECEIPT_V1.md`: receipt format and canonicalization specification.
 
