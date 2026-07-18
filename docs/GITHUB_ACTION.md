@@ -36,8 +36,8 @@ EB1 API. Do not store it in a workflow file, repository variable, receipt, or lo
 
 ## Example workflow
 
-Replace `OWNER/HREVN-AgentProof` with the published AgentProof repository and immutable
-release tag or commit SHA.
+The example uses the public AgentProof `v1` release. Pin it to a full commit SHA in
+security-sensitive repositories.
 
 ```yaml
 name: AgentProof
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6
-      - uses: OWNER/HREVN-AgentProof@v1
+      - uses: miguel-herrero-systems/HREVN-AgentProof@v1
         with:
           receipt-path: .agentproof/agent-session.json
           api-key: ${{ secrets.HREVN_AGENTPROOF_API_KEY }}

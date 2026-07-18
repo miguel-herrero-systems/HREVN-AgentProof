@@ -163,7 +163,7 @@ only after a `MATCH`, uploads the receipt plus signed EB1 ZIP and `.sha256` side
 creates or updates one PR comment with verification and Sepolia links.
 
 ```yaml
-- uses: OWNER/HREVN-AgentProof@v1
+- uses: miguel-herrero-systems/HREVN-AgentProof@v1
   with:
     receipt-path: .agentproof/agent-session.json
     api-key: ${{ secrets.HREVN_AGENTPROOF_API_KEY }}
