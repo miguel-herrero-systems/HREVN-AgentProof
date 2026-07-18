@@ -20,6 +20,7 @@ from .seal import AgentProofSealError, load_canonical_receipt, seal_receipt
 
 _MAX_BUNDLE_BYTES = 50 * 1024 * 1024
 _SHA256_RE = re.compile(r"^[0-9a-f]{64}$")
+_EVM_TRANSACTION_RE = re.compile(r"^(?:0x)?[0-9a-fA-F]{64}$")
 _REPOSITORY_RE = re.compile(r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
 _COMMENT_MARKER = "<!-- hrevn-agentproof -->"
 
@@ -69,13 +70,23 @@ def _anchor_explorer_url(network: str | None, transaction_reference: str | None)
     return None
 
 
+def _normalize_transaction_reference(value: Any) -> str | None:
+    if not isinstance(value, str) or not value:
+        return None
+    if _EVM_TRANSACTION_RE.fullmatch(value) and not value.startswith("0x"):
+        return f"0x{value}"
+    return value
+
+
 def _public_result(
     repository_verification: dict[str, Any],
     seal_response: dict[str, Any],
 ) -> dict[str, Any]:
     metadata = seal_response["metadata"]
     anchor = metadata.get("anchor") or {}
-    transaction_reference = anchor.get("transaction_reference")
+    transaction_reference = _normalize_transaction_reference(
+        anchor.get("transaction_reference")
+    )
     return {
         "result": "AGENT_VERIFIED",
         "repository_verification": {
@@ -114,6 +125,8 @@ def build_pull_request_comment(
     transaction_markdown = (
         f"[`{transaction}`]({transaction_url})" if transaction_url else f"`{transaction}`"
     )
+    checked_file_count = repository["checked_file_count"]
+    checked_file_label = "file" if checked_file_count == 1 else "files"
     links = [f"[Verify bundle]({bundle['verification_url']})"]
     links.append(f"[Download EB1]({bundle['download_url']})")
     if artifact_url:
@@ -129,7 +142,7 @@ def build_pull_request_comment(
             "| Check | Result |",
             "| --- | --- |",
             f"| Repository commitments | **{repository['result']}** "
-            f"({repository['checked_file_count']} files) |",
+            f"({checked_file_count} {checked_file_label}) |",
             f"| Ed25519 signature | **{bundle['signature_status']}** |",
             f"| Sepolia anchor | **{bundle['anchor_status']}** |",
             f"| Transaction | {transaction_markdown} |",

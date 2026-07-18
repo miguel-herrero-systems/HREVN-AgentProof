@@ -76,7 +76,7 @@ def _seal_response() -> dict:
             "verification_url": "https://proof.example/verify/BND-ACTION1234",
             "anchor": {
                 "network": "sepolia",
-                "transaction_reference": "0x" + "d" * 64,
+                "transaction_reference": "d" * 64,
             },
         },
     }
@@ -118,6 +118,10 @@ def test_action_verifies_seals_and_exports_clean_artifact(tmp_path):
     assert result["result"] == "AGENT_VERIFIED"
     assert result["repository_verification"]["result"] == "MATCH"
     assert "repository_root" not in result["repository_verification"]
+    assert result["bundle"]["transaction_reference"] == "0x" + "d" * 64
+    assert result["bundle"]["transaction_explorer_url"] == (
+        "https://sepolia.etherscan.io/tx/0x" + "d" * 64
+    )
     assert captured["api_key"] == "masked-secret"
     assert (output / "BND-ACTION1234.zip").read_bytes() == bundle_bytes
     assert (output / "agent-session.json").read_bytes() == receipt_path.read_bytes()
@@ -174,6 +178,7 @@ def test_pull_request_comment_is_precise_and_contains_no_secret():
     assert "<!-- hrevn-agentproof -->" in comment
     assert "Agent-verified" in comment
     assert "MATCH" in comment
+    assert "(2 files)" in comment
     assert "tamper-evident, not exhaustive" in comment
     assert "super-secret" not in comment
 
@@ -208,6 +213,7 @@ def test_publish_comment_updates_existing_agentproof_comment():
     )
 
     assert response["action"] == "updated"
+    assert "(1 file)" in build_pull_request_comment(result)
     assert requests[0][0] == "GET"
     assert requests[1][0] == "PATCH"
     assert requests[1][1].endswith("/issues/comments/42")
